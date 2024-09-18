@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, interval } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
-@Injectable({
+@Injectable({   
   providedIn: 'root',
 })
 export class ExchangeRateService {

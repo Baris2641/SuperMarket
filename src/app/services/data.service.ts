@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Market } from '../models/market.model';
 import { Product } from '../models/product.model';
-import { Reyon } from '../models/reyon.model';
-import { HttpClientModule } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -34,17 +32,15 @@ export class DataService {
   deleteProduct(marketId: string, reyonId: string, productId: string): Observable<void> {
     const currentMarkets = this.marketsSubject.value;
     const market = currentMarkets.find(m => m.id === marketId);
-    
+
     if (market) {
       const reyon = market.reyonlar.find(r => r.id === reyonId);
-      
       if (reyon) {
-        // Ürünü reyondan sil
         reyon.products = reyon.products.filter(p => p.id !== productId);
-        this.updateMarkets(currentMarkets); // Güncellenen marketleri kaydet
+        this.updateMarkets(currentMarkets);
       }
     }
-    return of();
+    return of(); // Observable döndür
   }
 
   addProduct(marketId: string, reyonId: string, newProduct: Product): Observable<void> {
@@ -53,30 +49,30 @@ export class DataService {
     if (market) {
       const reyon = market.reyonlar.find(r => r.id === reyonId);
       if (reyon) {
-        // Ürün ekleniyor
+        newProduct.type = reyon.type;
         reyon.products.push(newProduct);
         this.updateMarkets(currentMarkets);
       }
     }
-    return of();  // Observable döndürmemiz gerekiyor
+    return of(); // Observable döndür
   }
 
- addReyon(marketId: string, reyonType: string): Observable<void> {
-  const currentMarkets = this.marketsSubject.value;
-  const market = currentMarkets.find(m => m.id === marketId);
-  if (market) {
-    const newReyonId = `R${market.reyonlar.length + 1}`;
-    const newReyon = {
-      id: newReyonId,
-      name: newReyonId,
-      type: reyonType,
-      products: []
-    };
-    market.reyonlar.push(newReyon);
-    this.updateMarkets(currentMarkets);
+  addReyon(marketId: string, reyonType: string): Observable<void> {
+    const currentMarkets = this.marketsSubject.value;
+    const market = currentMarkets.find(m => m.id === marketId);
+    if (market) {
+      const newReyonId = `R${market.reyonlar.length + 1}`;
+      const newReyon = {
+        id: newReyonId,
+        name: newReyonId,
+        type: reyonType,
+        products: []
+      };
+      market.reyonlar.push(newReyon);
+      this.updateMarkets(currentMarkets);
+    }
+    return of(); // Observable döndür
   }
-  return of(); // Observable dön
-}
 
   deleteReyon(marketId: string, reyonId: string): Observable<void> {
     const currentMarkets = this.marketsSubject.value;
@@ -85,14 +81,7 @@ export class DataService {
       market.reyonlar = market.reyonlar.filter(r => r.id !== reyonId);
       this.updateMarkets(currentMarkets);
     }
-    return of(); 
-  }
-
-  getExchangeRates() {
-    return {
-      USDTRY: '33.7870',
-      EURTRY: '37.6571'
-    };
+    return of(); // Observable döndür
   }
 
   searchProduct(query: string): Observable<Market[]> {

@@ -1,11 +1,10 @@
 <body>
-  <!-- Navbar -->
   <div class="navbar">
     <h1>Supermarket Uygulaması</h1>
-    <input type="text" placeholder="Ürün Ara" [(ngModel)]="searchQuery" (input)="searchProduct()" class="form-control" />
+    <input type="text" placeholder="Ürün Ara" [(ngModel)]="searchQuery" (input)="searchProduct()"
+      class="form-control" />
   </div>
 
-  <!-- Market ve Reyon Listesi -->
   <div class="container">
     <div class="aisles">
       <div *ngFor="let market of markets$ | async" class="market-section">
@@ -15,77 +14,91 @@
           <ul>
             <li *ngFor="let product of reyon.products">
               {{ product.name }} ({{ product.type }})
-              <button (click)="deleteProduct(market.id, reyon.id, product.id)">Sil</button>
+              <button class="btn btn-danger" (click)="deleteProduct(market.id, reyon.id, product.id)">Sil</button>
             </li>
           </ul>
-          <button class="btn btn-primary" (click)="openProductModal(market.id, reyon.id)">Ürün Ekle</button>
-          <button class="btn btn-primary" (click)="deleteReyon(market.id, reyon.id)">Reyon Sil</button>
+          
+          <button class="btn btn-danger" (click)="deleteReyon(market.id, reyon.id)">Reyon Sil</button>
         </div>
-        <button class="btn btn-primary" (click)="openReyonModal(market.id)">Reyon Ekle</button>
+        <button class="btn btn-primary" data-bs-toggle="modal" (click)="onAddReyonModal()">Reyon Ekle</button>
+        <button class="btn btn-primary" data-bs-toggle="modal" (click)="onAddProductModal()">Ürün Ekle</button>
       </div>
     </div>
   </div>
 
-  <!-- Sidebar işlemleri -->
-  <div class="sidebar">
-    <div class="sidebar-section">
-      <h2>İşlemler</h2>
-      <!-- openReyonModal için marketId sağlıyoruz -->
-      <button class="btn btn-primary" (click)="openReyonModal(selectedMarketId)">Reyon Ekle</button>
-      <!-- openProductModal için marketId ve reyonId sağlıyoruz -->
-      <button class="btn btn-primary" (click)="openProductModal(selectedMarketId, selectedReyonId)">Ürün Ekle</button>
+  <!-- Ürün Ekle Modalı -->
+  <div class="modal fade" id="offcanvasUrunEkleOne" aria-labelledby="offcanvasUrunEkleLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="offcanvasUrunEkleLabel">Ürün Ekle</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="productId" class="form-label">Ürün ID</label>
+              <input type="text" class="form-control" id="productId" [(ngModel)]="productId" name="productId" required>
+            </div>
+            <div class="mb-3">
+              <label for="productName" class="form-label">Ürün Adı</label>
+              <input type="text" class="form-control" id="productName" [(ngModel)]="productName" name="productName"
+                required>
+            </div>
+            <div class="mb-3">
+              <label for="reyonId" class="form-label">Eklenilecek Reyon</label>
+              <select class="form-select" [(ngModel)]="selectedReyonId" name="reyonId">
+                <ng-container *ngFor="let market of markets$ | async">
+                  <option *ngFor="let reyon of market.reyonlar" [ngValue]="reyon.id">{{ reyon.name + ' ' + market.name }}</option>
+                </ng-container>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="marketId" class="form-label">Eklenilecek Market</label>
+              <select class="form-select" [(ngModel)]="selectedMarketId" name="marketId">
+                <option [ngValue]="'1'"> Market A</option>
+                <option [ngValue]="'2'"> Market B</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+          <button type="button" class="btn btn-primary" (click)="onAddProduct()"
+            [disabled]="!productId || !productName">Ekle</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Reyon Ekleme Offcanvas -->
-  <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasReyonEkle" aria-labelledby="offcanvasReyonEkleLabel">
-    <div class="offcanvas-header">
-      <h5 id="offcanvasReyonEkleLabel">Reyon Ekle</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-      <form>
-        <div class="mb-3">
-          <label for="reyonType" class="form-label">Reyon Türü</label>
-          <select class="form-select" [(ngModel)]="selectedReyonType" name="reyonType">
-            <option value="Gıda">Gıda</option>
-            <option value="Temizlik">Temizlik</option>
-            <option value="Elektronik">Elektronik</option>
-            <option value="Kırtasiye">Kırtasiye</option>
-            <option value="Kozmetik">Kozmetik</option>
-          </select>
+  <!-- Reyon Ekle Modalı -->
+  <div class="modal fade" id="offcanvasReyonEkleOne" tabindex="-1" aria-labelledby="offcanvasReyonEkleLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="offcanvasReyonEkleLabel">Reyon Ekle</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-      </form>
-      <button class="btn btn-primary" (click)="onAddReyon()">Reyon Ekle</button>
-    </div>
-  </div>
-
-  <!-- Ürün Ekleme Offcanvas -->
-  <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasUrunEkle" aria-labelledby="offcanvasUrunEkleLabel">
-    <div class="offcanvas-header">
-      <h5 id="offcanvasUrunEkleLabel">Ürün Ekle</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-      <form>
-        <div class="mb-3">
-          <label for="productId" class="form-label">Ürün ID</label>
-          <input type="text" class="form-control" id="productId" [(ngModel)]="productId" name="productId">
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="reyonType" class="form-label">Reyon Türü</label>
+              <select class="form-select" [(ngModel)]="selectedReyonType" name="reyonType">
+                <option value="Gıda">Gıda</option>
+                <option value="Temizlik">Temizlik</option>
+                <option value="Elektronik">Elektronik</option>
+                <option value="Kırtasiye">Kırtasiye</option>
+                <option value="Kozmetik">Kozmetik</option>
+              </select>
+            </div>
+          </form>
         </div>
-        <div class="mb-3">
-          <label for="productName" class="form-label">Ürün Adı</label>
-          <input type="text" class="form-control" id="productName" [(ngModel)]="productName" name="productName">
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+          <button type="button" class="btn btn-primary" (click)="onAddReyon()">Ekle</button>
         </div>
-        <div class="mb-3">
-          <label for="reyonId" class="form-label">Eklenilecek Reyon</label>
-          <select class="form-select" [(ngModel)]="selectedReyonId" name="reyonId">
-            <ng-container *ngFor="let market of markets$ | async">
-              <option *ngFor="let reyon of market.reyonlar" [ngValue]="reyon.id">{{ reyon.name }}</option>
-            </ng-container>
-          </select>
-        </div>
-      </form>
-      <button class="btn btn-primary" (click)="onAddProduct()">Ürün Ekle</button>
+      </div>
     </div>
   </div>
 </body>
